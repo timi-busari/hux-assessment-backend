@@ -10,15 +10,6 @@ import mongoose from "mongoose";
 
 jest.mock("../models/user.model");
 
-// Constants for testing
-const JWT_SECRET = process.env.JWT_SECRET || "test-secret";
-const TEST_USER_ID = "507f1f77bcf86cd799439011";
-
-// Helper function to generate a valid JWT token
-const generateTestToken = () => {
-  return jwt.sign({ id: TEST_USER_ID }, JWT_SECRET);
-};
-
 describe("User Controller", () => {
   const userId = new mongoose.Types.ObjectId().toString();
 
