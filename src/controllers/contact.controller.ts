@@ -20,7 +20,10 @@ export const createContact = async (req: AuthRequest, res: Response) => {
 
 export const getAllContacts = async (req: AuthRequest, res: Response) => {
   try {
-    const contacts = await Contact.find({ user: req.user.id });
+    const contacts = await Contact.find({ user: req.user.id }).sort({
+      createdAt: -1,
+    });
+
     res.status(200).json(contacts);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -48,7 +51,7 @@ export const updateContact = async (req: AuthRequest, res: Response) => {
     const contact = await Contact.findOneAndUpdate(
       { _id: req.params.id, user: req.user.id },
       req.body,
-      { new: true, runValidators: true } // Return updated document
+      { new: true, runValidators: true } // return updated document
     );
 
     if (!contact) {

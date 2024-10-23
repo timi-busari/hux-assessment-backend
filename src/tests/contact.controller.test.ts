@@ -15,6 +15,14 @@ jest.mock("../models/contact.model");
 
 describe("Contact Controller", () => {
   const userId = new mongoose.Types.ObjectId().toString();
+  // Mock the Contact model
+  const mockSort = jest.fn();
+
+  jest.mock("../models/contact.model", () => ({
+    find: jest.fn().mockReturnThis(),
+    sort: mockSort,
+  }));
+
   const mockContact = {
     _id: new mongoose.Types.ObjectId().toString(), // Generating a mock user ID
     firstName: "Timi",
@@ -84,38 +92,48 @@ describe("Contact Controller", () => {
   });
 
   describe("getAllContacts", () => {
-    it("should return all contacts for a user", async () => {
-      const req = getMockReq({
-        // Mocking the request object
-        user: { id: userId },
-      }) as AuthRequest;
+    describe("getAllContacts", () => {
+      it("should return all contacts for a user sorted by createdAt", async () => {
+        // Arrange
+        const req = getMockReq({
+          user: { id: userId },
+        }) as AuthRequest;
 
-      const { res } = getMockRes(); // Mocking the response object
+        const { res } = getMockRes();
 
-      const mockContacts = [mockContact];
-      (Contact.find as jest.Mock).mockResolvedValueOnce(mockContacts);
+        const mockContacts = [mockContact];
 
-      await getAllContacts(req, res);
+        // mock the chained methods
+        (Contact.find as jest.Mock).mockReturnValue({
+          sort: mockSort.mockResolvedValue(mockContacts),
+        });
 
-      expect(Contact.find).toHaveBeenCalledWith({ user: userId });
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(mockContacts);
-    });
+        await getAllContacts(req, res);
 
-    it("should handle errors when fetching contacts", async () => {
-      const req = getMockReq({
-        user: { id: userId },
-      }) as AuthRequest;
+        expect(Contact.find).toHaveBeenCalledWith({ user: userId });
+        expect(mockSort).toHaveBeenCalledWith({ createdAt: -1 });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(mockContacts);
+      });
 
-      const { res } = getMockRes();
+      it("should handle errors appropriately", async () => {
+        const req = getMockReq({
+          user: { id: userId },
+        }) as AuthRequest;
 
-      const error = new Error("Database error");
-      (Contact.find as jest.Mock).mockRejectedValueOnce(error);
+        const { res } = getMockRes();
 
-      await getAllContacts(req, res);
+        const errorMessage = "Database error";
+        (Contact.find as jest.Mock).mockReturnValue({
+          sort: mockSort.mockRejectedValue(new Error(errorMessage)),
+        });
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ message: error.message });
+        await getAllContacts(req, res);
+
+        expect(Contact.find).toHaveBeenCalledWith({ user: userId });
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ message: errorMessage });
+      });
     });
   });
 

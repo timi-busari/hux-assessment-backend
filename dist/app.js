@@ -8,12 +8,17 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const user_route_1 = __importDefault(require("./routes/user.route"));
 const contact_route_1 = __importDefault(require("./routes/contact.route"));
+const cors_1 = __importDefault(require("cors"));
 // load environment variables
 dotenv_1.default.config();
 // initialize Express app
 const app = (0, express_1.default)();
 // middleware to parse JSON requests
 app.use(express_1.default.json());
+// Enable CORS for specific origin
+app.use((0, cors_1.default)({
+    origin: process.env.ALLOWED_ORIGIN, // Allow only frontend origin
+}));
 // connect to MongoDB
 mongoose_1.default
     .connect(process.env.MONGO_URI || "")

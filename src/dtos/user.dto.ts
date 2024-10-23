@@ -1,8 +1,6 @@
 import {
   IsString,
   IsNotEmpty,
-  IsPhoneNumber,
-  minLength,
   MinLength,
 } from "class-validator";
 

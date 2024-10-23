@@ -7,11 +7,14 @@ export interface IContact extends Document {
   user: Schema.Types.ObjectId;
 }
 
-const contactSchema = new Schema<IContact>({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  phoneNumber: { type: String, required: true, unique: true },
-  user: { type: Schema.Types.ObjectId, ref: "User" },
-});
+const contactSchema = new Schema<IContact>(
+  {
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    phoneNumber: { type: String, required: true, unique: true },
+    user: { type: Schema.Types.ObjectId, ref: "User" },
+  },
+  { timestamps: true }
+);
 
 export default model<IContact>("Contact", contactSchema);

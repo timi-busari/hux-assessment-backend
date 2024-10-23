@@ -12,6 +12,8 @@ export const register = async (req: Request, res: Response) => {
       res
         .status(401)
         .json({ message: `User ${username} already has an account` });
+
+      return;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

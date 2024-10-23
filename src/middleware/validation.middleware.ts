@@ -8,8 +8,18 @@ export const validationMiddleware = (dto: any) => {
     const errors = await validate(dtoObj);
 
     if (errors.length > 0) {
-        res.status(400).json({ errors });
-        return 
+      const formattedErrors = errors.map((error) => {
+        return {
+          field: error.property,
+          errors: Object.values(error.constraints || {}),
+        };
+      });
+
+      res.status(400).json({
+        message: "Validation failed",
+        errors: formattedErrors,
+      });
+      return;
     }
 
     next();

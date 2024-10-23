@@ -99,7 +99,7 @@ describe("User Controller", () => {
     it("should log out a user", async () => {
       const response = await request(app).post("/api/users/logout"); // Updated path
       expect(response.status).toBe(200);
-      expect(response.body.message).toBe("Logout successful"); // Uncomment this line to check the response body
+      expect(response.body.message).toBe("Logout successful");
     });
   });
 });
