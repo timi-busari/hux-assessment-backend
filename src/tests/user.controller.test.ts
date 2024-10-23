@@ -2,10 +2,26 @@ import request from "supertest";
 import app from "../app";
 import User from "../models/user.model";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { AuthRequest } from "../middleware/auth.middleware";
+import { getMockReq, getMockRes } from "@jest-mock/express";
+import { logout } from "../controllers/user.controller";
+import mongoose from "mongoose";
 
 jest.mock("../models/user.model");
 
+// Constants for testing
+const JWT_SECRET = process.env.JWT_SECRET || "test-secret";
+const TEST_USER_ID = "507f1f77bcf86cd799439011";
+
+// Helper function to generate a valid JWT token
+const generateTestToken = () => {
+  return jwt.sign({ id: TEST_USER_ID }, JWT_SECRET);
+};
+
 describe("User Controller", () => {
+  const userId = new mongoose.Types.ObjectId().toString();
+
   beforeEach(() => {
     jest.clearAllMocks(); // clear mocks before each test
   });
@@ -97,9 +113,16 @@ describe("User Controller", () => {
 
   describe("POST /api/users/logout", () => {
     it("should log out a user", async () => {
-      const response = await request(app).post("/api/users/logout"); // Updated path
-      expect(response.status).toBe(200);
-      expect(response.body.message).toBe("Logout successful");
+      const req = getMockReq({
+        user: { id: userId },
+      }) as AuthRequest;
+
+      const { res } = getMockRes();
+
+      await logout(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ message: "Logout successful" });
     });
   });
 });
